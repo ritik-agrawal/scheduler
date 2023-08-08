@@ -1,0 +1,194 @@
+openapi: 3.0.0
+servers:
+  - url: 'http://localhost:9090/v1'
+info:
+  version: '1.0'
+  title: Car Service Scheduler
+  description: >-
+    A backend for booking, rescheduling and cancelling appointments for car service.
+tags:
+  - name: scheduler
+    description: All the available requests
+components:
+  schemas:
+    Response:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code.
+        message:
+          type: string
+          description: provides the message related to the request made.
+    AppointmentDetails:
+      type: array
+      items:
+        $ref: '#/components/schemas/AppointmentDetail'
+    AppointmentDetail:
+      type: object
+      properties:
+        appointmentId:
+          type: integer
+          description: Id of the appointment.
+        slot:
+          type: string
+          description: It's the time slot. Example, "2-3" this means from 2 to 3.
+    BookRequest:
+      type: object
+      properties:
+        operatorId:
+          type: integer
+          description: Id of the operator.
+        from:
+          type: integer
+          description: Specify the time from which the booking starts.
+        to:
+          type: integer
+          description: Specify the time to which the booking will be.
+    BookResponse:
+      type: object
+      properties:
+        operatorId:
+          type: integer
+          description: Id of the operator.
+        operatorName:
+          type: string
+          description: Name of the operator.
+        from:
+          type: integer
+          description: Specify the time from which the booking starts.
+        to:
+          type: integer
+          description: Specify the time to which the booking will be.
+    RescheduleRequest:
+      type: object
+      properties:
+        appointmentId:
+          type: integer
+          description: Id of the operator.
+        from:
+          type: integer
+          description: Specify the time from which the booking starts.
+        to:
+          type: integer
+          description: Specify the time to which the booking will be.
+    OpenSlots:
+      type: object
+      properties:
+        operatorName:
+          type: string
+          description: here the operatorName will be the name of the operator and the value for the same will be the list of booked slots.
+paths:
+  /all-bookings:
+    get:
+      tags:
+        - scheduler
+      description: This is used to fetch all the bookings done across the operators.
+      responses:
+        '200':
+          description: When all the bookings are fetched successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentDetails'
+        '400':
+          description: When bad request is made.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /open-slots:
+    get:
+      tags:
+        - scheduler
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: string
+          required: true
+      description: This is used to get all the available slots for the specified operator.
+      responses:
+        '200':
+          description: When the available slots for booking is fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref : '#/components/schemas/OpenSlots'
+        '400':
+          description: When the given input is not correct.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /book:
+    post:
+      tags:
+        - scheduler
+      description: This is used to book an appointment in a operator.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookRequest'
+      responses:
+        '200':
+          description: Successful appointment booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponse'
+        '400':
+          description: When any mistake in the input given.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /reschedule:
+    put:
+      tags:
+        - scheduler
+      description: This is used to reschedule an appointment already done.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              $ref: '#/components/schemas/RescheduleRequest'
+      responses:
+        '200':
+          description: When the appointment is updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponse'
+        '400':
+          description: When the given input is not correct.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /cancel:
+    delete:
+      tags:
+        - scheduler
+      parameters:
+        - in: query
+          name: appointment_id
+          schema:
+            type: string
+          required: true
+      description: This is used to cancel an already booked appointment.
+      responses:
+        '200':
+          description: when the appointment is successfully cancelled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '400':
+          description: when the given input is not correct.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
