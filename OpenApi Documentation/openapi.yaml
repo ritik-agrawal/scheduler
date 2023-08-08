@@ -1,6 +1,6 @@
 openapi: 3.0.0
 servers:
-  - url: 'http://localhost:9090/v1'
+  - url: 'http://localhost:9090/v1/appointment'
 info:
   version: '1.0'
   title: Car Service Scheduler
